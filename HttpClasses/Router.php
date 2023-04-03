@@ -1,20 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace HttpClasses;
 
 use Closure;
+use HttpClasses\Request;
 
 class Router
 {
   const MIDDLEWARES = true;
 
   private static self $instance;
+  private Request $request;
 
   // Array que armazena todas a rotas do projeto.
   private static array $routes;
 
   private function __construct()
   {
+    $this->request = Request::create();
   }
 
   public static function init(string $pathRoutes): self
@@ -83,6 +88,29 @@ class Router
    */
   public function run()
   {
-    
+    $controller = $this->getRoute();
+    if (!$controller['controller'])
+      throw new \Exception("Controlador não encontrado", 500);
+
+    return call_user_func($controller['controller']);
+  }
+
+  private function getRoute()
+  {
+    $uri = $this->request->getUri();
+    if (!str_ends_with($uri, '/'))
+      $uri = $uri . '/';
+
+    foreach (self::$routes as $route => $method) {
+      if (preg_match($uri, $route)) {
+        if ($method[$this->request->getHttpMethod()]) {
+          return $method[$this->request->getHttpMethod()];
+        }
+
+        throw new \Exception("Método não permitido", 405);
+      }
+
+      throw new \Exception("Rota não encontrada", 404);
+    }
   }
 }
