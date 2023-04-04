@@ -44,8 +44,9 @@ class Request
   {
     return self::$queryParams;
   }
-  public function getQueryParam(string|int $field)
+  public function getQueryParam(string|int $field): int|string
   {
+    return self::$queryParams[$field] ? self::$queryParams[$field] : null;
   }
 
   public function getHeaders(): array
@@ -53,8 +54,9 @@ class Request
     return self::$headers;
   }
 
-  public function getHeader(string|int $field)
+  public function getHeader(string|int $field): int|string
   {
+    return self::$headers[$field] ? self::$headers[$field] : null;
   }
 
   public function getPostVars(): array
@@ -62,8 +64,9 @@ class Request
     return self::$postVars;
   }
 
-  public function getPostVar(string|int $field)
+  public function getPostVar(string|int $field): int|string
   {
+    return self::$postVars[$field] ? self::$postVars[$field] : null;
   }
 
   public function getUri(): string
