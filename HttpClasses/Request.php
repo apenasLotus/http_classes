@@ -17,6 +17,9 @@ class Request
     $httpMethod,
     $uri;
 
+  private mixed
+    $payload;
+
   private function __construct()
   {
     self::$headers = getallheaders();
@@ -44,7 +47,7 @@ class Request
   {
     return self::$queryParams;
   }
-  public function getQueryParam(string|int $field): int|string
+  public function getQueryParam(string|int $field): int|string|null
   {
     return self::$queryParams[$field] ? self::$queryParams[$field] : null;
   }
@@ -54,7 +57,7 @@ class Request
     return self::$headers;
   }
 
-  public function getHeader(string|int $field): int|string
+  public function getHeader(string|int $field): int|string|null
   {
     return self::$headers[$field] ? self::$headers[$field] : null;
   }
@@ -64,7 +67,7 @@ class Request
     return self::$postVars;
   }
 
-  public function getPostVar(string|int $field): int|string
+  public function getPostVar(string|int $field): int|string|null
   {
     return self::$postVars[$field] ? self::$postVars[$field] : null;
   }
@@ -72,6 +75,16 @@ class Request
   public function getUri(): string
   {
     return self::$uri;
+  }
+
+  public function setPayload(mixed $data): void
+  {
+    $this->payload = $data;
+  }
+
+  public function getPayload(): mixed
+  {
+    return $this->payload ? $this->payload : null;
   }
 
   private function setPostVars(): void
