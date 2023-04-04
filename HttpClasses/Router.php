@@ -80,8 +80,15 @@ class Router
       }
     }
 
-    $route = '^/' . str_replace('/', '\/', $route) . '$/';
-    self::$routes[$route] = [$method => $params];
+    $route = '/^' . str_replace('/', '\/', $route) . '$/';
+    if (preg_match_all('/{(.*?)}/', $route, $matches)) {
+      $route = preg_replace('/{(.*?)}/', '(.*?)', $route);
+    }
+
+    self::$routes[$route] = [
+      $method => $params,
+      'vars' => $matches[array_key_last($matches) ?? null]
+    ];
   }
 
   /**
@@ -94,7 +101,7 @@ class Router
       if (!$controller['controller'])
         throw new \Exception("Controlador não encontrado", 500);
 
-      call_user_func($controller['controller']);
+      call_user_func_array($controller['controller'], $controller['vars']);
       return $this->response;
     } catch (\Exception $err) {
 
@@ -111,19 +118,22 @@ class Router
   private function getRoute()
   {
     $uri = $this->request->getUri();
-    if (!str_ends_with($uri, '/'))
-      $uri = $uri . '/';
+    $httpMethod = $this->request->getHttpMethod();
 
     foreach (self::$routes as $route => $method) {
-      if (preg_match($uri, $route)) {
-        if ($method[$this->request->getHttpMethod()]) {
-          return $method[$this->request->getHttpMethod()];
+      if (preg_match($route, $uri, $matches)) {
+
+        if ($method[$httpMethod]) {
+          unset($matches[0]);
+
+          $method[$httpMethod]['vars'] = array_combine($method['vars'], $matches);
+          return $method[$httpMethod];
         }
 
         throw new \Exception("Método não permitido", 405);
       }
-
-      throw new \Exception("Rota não encontrada", 404);
     }
+
+    throw new \Exception("Rota não encontrada", 404);
   }
 }
