@@ -81,8 +81,10 @@ class Router
     }
 
     $route = '/^' . str_replace('/', '\/', $route) . '$/';
-    if (preg_match_all('/{(.*?)}/', $route, $matches)) {
-      $route = preg_replace('/{(.*?)}/', '(.*?)', $route);
+    $regexVars = '/{(.*?)}/';
+
+    if (preg_match_all($regexVars, $route, $matches)) {
+      $route = preg_replace($regexVars, '(.*?)', $route);
     }
 
     self::$routes[$route] = [
