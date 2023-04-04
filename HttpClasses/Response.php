@@ -59,7 +59,7 @@ class Response
     switch ($this->headers['Content-Type']) {
       case 'application/json':
 
-        $this->content = json_encode($this->content);
+        $this->content = json_encode($this->content ?? null);
         exit($this->content);
 
       default:
