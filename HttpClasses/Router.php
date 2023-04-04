@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace HttpClasses;
 
-use Closure;
 use HttpClasses\Request;
 
 class Router
@@ -13,6 +12,7 @@ class Router
 
   private static self $instance;
   private Request $request;
+  private Response $response;
 
   // Array que armazena todas a rotas do projeto.
   private static array $routes;
@@ -20,6 +20,7 @@ class Router
   private function __construct()
   {
     $this->request = Request::create();
+    $this->response = Response::create();
   }
 
   public static function init(string $pathRoutes): self
@@ -73,7 +74,7 @@ class Router
   private static function addRoute(string $method, string $route, array $params)
   {
     foreach ($params as $key => $param) {
-      if ($param instanceof Closure) {
+      if ($param instanceof \Closure) {
         $params['controller'] = $param;
         unset($params[$key]);
       }
@@ -86,13 +87,25 @@ class Router
   /**
    * Executa a rota acessada.
    */
-  public function run()
+  public function run(): Response
   {
-    $controller = $this->getRoute();
-    if (!$controller['controller'])
-      throw new \Exception("Controlador não encontrado", 500);
+    try {
+      $controller = $this->getRoute();
+      if (!$controller['controller'])
+        throw new \Exception("Controlador não encontrado", 500);
 
-    return call_user_func($controller['controller']);
+      call_user_func($controller['controller']);
+      return $this->response;
+    } catch (\Exception $err) {
+
+      return $this->response->setResponse(
+        $err->getCode(),
+        [
+          'code' => $err->getCode(),
+          'message' => $err->getMessage()
+        ]
+      );
+    }
   }
 
   private function getRoute()
