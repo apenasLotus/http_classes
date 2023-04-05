@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace HttpClasses;
 
+use HttpClasses\Middlewares\Queue;
 use HttpClasses\Request;
+use HttpClasses\Response;
 
 class Router
 {
-  const MIDDLEWARES = true;
+  const MIDDLEWARES = 'MIDDLEWARES';
 
   private static self $instance;
   private Request $request;
@@ -23,6 +25,10 @@ class Router
     $this->response = Response::create();
   }
 
+  /**
+   * Recebe o caminho base para os arquivos onde ficam as roras seguindo o esquema de árvores
+   * Pasta raiz --- Pasta rota x --- Arquivo de rota.php
+   */
   public static function init(string $pathRoutes): self
   {
     if (isset(self::$instance))
@@ -103,8 +109,10 @@ class Router
       if (!$controller['controller'])
         throw new \Exception("Controlador não encontrado", 500);
 
-      call_user_func_array($controller['controller'], $controller['vars']);
-      return $this->response;
+      $this->runRules();
+      $data = $this->runMiddlewares($controller);
+
+      return $data instanceof Response ? $data : $this->response->setResponse(200, $data);
     } catch (\Exception $err) {
 
       return $this->response->setResponse(
@@ -115,6 +123,20 @@ class Router
         ]
       );
     }
+  }
+
+  private function runMiddlewares(array $dataController): mixed
+  {
+    return (new Queue(
+      $dataController[self::MIDDLEWARES],
+      $dataController['vars'] ?? [],
+      $dataController['controller']
+    ))->nextMiddleware($this->request);
+  }
+
+  // ! TODO fazer os 'middlewares' de regras
+  private function runRules()
+  {
   }
 
   private function getRoute()
