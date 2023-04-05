@@ -10,7 +10,7 @@ class Queue
   {
   }
 
-  public function nextMiddleware(Request $request)
+  public function nextMiddleware(Request $request): Mixed
   {
     if (empty($this->middlewares))
       return call_user_func_array($this->controller, $this->vars ?? []);

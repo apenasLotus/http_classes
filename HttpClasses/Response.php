@@ -52,7 +52,7 @@ class Response
     }
   }
 
-  public function sendResponse()
+  public function sendResponse(): void
   {
     $this->sendHeaders();
 

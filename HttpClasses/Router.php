@@ -41,7 +41,7 @@ class Router
     return (self::$instance = new self);
   }
 
-  private static function includeRoutesArchives(string $pathRoutes)
+  private static function includeRoutesArchives(string $pathRoutes): void
   {
     $archives = glob($pathRoutes . '/*/*.php');
     if (empty($archives) || !isset($archives))
@@ -72,12 +72,12 @@ class Router
     self::addRoute('PATH', $route, $params);
   }
 
-  public static function delete(string $route, array $params)
+  public static function delete(string $route, array $params): void
   {
     self::addRoute('DELETE', $route, $params);
   }
 
-  private static function addRoute(string $method, string $route, array $params)
+  private static function addRoute(string $method, string $route, array $params): void
   {
     foreach ($params as $key => $param) {
       if ($param instanceof \Closure) {
@@ -135,11 +135,11 @@ class Router
   }
 
   // ! TODO fazer os 'middlewares' de regras
-  private function runRules()
+  private function runRules(): void
   {
   }
 
-  private function getRoute()
+  private function getRoute(): array
   {
     $uri = $this->request->getUri();
     $httpMethod = $this->request->getHttpMethod();
