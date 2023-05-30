@@ -128,7 +128,7 @@ class Router
   private function runMiddlewares(array $dataController): mixed
   {
     return (new Queue(
-      $dataController[self::MIDDLEWARES],
+      $dataController[self::MIDDLEWARES] ?? [],
       $dataController['vars'] ?? [],
       $dataController['controller']
     ))->nextMiddleware($this->request);
@@ -151,6 +151,10 @@ class Router
           unset($matches[0]);
 
           $method[$httpMethod]['vars'] = array_combine($method['vars'], $matches);
+
+          $method[$httpMethod]['vars']['request']  = $this->request;
+          $method[$httpMethod]['vars']['response'] = $this->response;
+
           return $method[$httpMethod];
         }
 
