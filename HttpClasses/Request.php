@@ -90,7 +90,7 @@ class Request
   private function setPostVars(): void
   {
     $postVars = $_POST ?? [];
-    $inputVars = json_decode(file_get_contents('php://input') ?? [], true);
+    $inputVars = json_decode(file_get_contents('php://input') ?? [], true) ?? [];
 
     self::$postVars = [...$postVars, ...$inputVars];
   }
